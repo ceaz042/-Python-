@@ -2,18 +2,16 @@ import cv2
 import numpy as np
 import enum
 import os
+from matplotlib import pyplot as plt
 
 class BaseIP:
-    def __init__(self, img):
-        self.img = img
-
     @staticmethod
-    def ImRead(filename):
-          return cv2.imread(filename, cv2.IMREAD_UNCHANGED)
+    def ImRead(SrcImg):
+          return cv2.imread(SrcImg, cv2.IMREAD_UNCHANGED)
         
     @staticmethod
-    def ImWrite(filename, img):
-        cv2.imwrite(filename, img[cv2.IMWRITE_JPEG_QUALITY, 100])
+    def ImWrite(SrcImg, img):
+        cv2.imwrite(SrcImg, img[cv2.IMWRITE_JPEG_QUALITY, 100])
 
     @staticmethod
     def ImShow(winName, img):
@@ -135,6 +133,23 @@ class AlhpaBlend:
         # Display image
         cv2.imshow("outImg", outImage/255)
         cv2.waitKey(0)
+class HistIP(BaseIP):
+    @staticmethod
+    def ImBGR2Gray(SrcImg):
+        return cv2.cvtColor(SrcImg, cv2.COLOR_BGR2GRAY)
 
+    @staticmethod
+    def ImBGRA2BGR(SrcImg):
+        return cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
 
+    @staticmethod
+    def CalcGrayHist(SrcGray):
+        return cv2.calcHist(SrcGray, [0], None, [256], [0, 256])
+    @staticmethod
+    def ShowGrayHist(Winname, GrayHist):
+        ImWindow(Winname)
+        ImShow(Winname, GrayHist)
+    
+
+    
        
