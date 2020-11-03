@@ -1,26 +1,14 @@
-import cv2
+import numpy as np
+import cv2IP
 
-# Read the images 
-foreground = cv2.imread("imgs\\front.png") 
-background = cv2.imread("imgs\\ocean.png") 
-alpha = cv2.imread("front_alpha.png")
+# a = np.arange(24)
+# b = np.arange(24)
+# c = np.arange(24)
+# C = np.vstack((a,b))
+# D = print(np.hstack((A,B)))
+# E = np.vstack((C,c))
+# print(E)
+# print(len(E))
 
-# Convert uint8 to float 
-foreground = foreground.astype(float) 
-background = background.astype(float)
-
-# Normalize the alpha mask to keep intensity between 0 and 1
-alpha = alpha.astype(float)/255
-
-# Multiply the foreground with the alpha matte 
-foreground = cv2.multiply(alpha, foreground) 
-
-# # Multiply the background with ( 1 - alpha ) 
-background = cv2.multiply(1.0 - alpha, background) 
-
-# # Add the masked foreground and background. 
-outImage = cv2.add(foreground, background)
-
-# Display image 
-cv2.imshow("outImg", outImage/255) 
-cv2.waitKey(0)
+red = cv2IP.ColorType(1)
+print(red)

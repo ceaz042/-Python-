@@ -7,8 +7,6 @@ from tkinter import filedialog
 
 from matplotlib import pyplot as plt
 
-srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\front.png"
-BackGround = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\img03.jpg"
 # channel = []
 # Foreground = cv2.imread(srcImg,cv2.IMREAD_UNCHANGED)
 # Back =  cv2.imread(BackGround,cv2.IMREAD_UNCHANGED)
@@ -54,18 +52,26 @@ def Example_AlphaBlend():
     cv2.destroyAllWindows()
     del aa
     return
+
 # Example_AlphaBlend()
 
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
-img = cv2IP.BaseIP.ImRead(srcImg)
-Hist = cv2IP.HistIP()
-mask = Hist.ImBGRA2BGR(img)
-ColorHist = Hist.CalcColorHist(mask)
+if __name__ == '__main__':
+    # srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\front.png"
+    srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\nature.jpg"
+    BackGround = "C:\\VSCode\\Python\\OpenCV\\PyCV2IP\\imgs\\img03.jpg"
 
-print(len(ColorHist))
-# print(len(ColorHist))
-# cv2.waitKey(0)
-# plt.plot(GrayHist)
-# plt.show()
+    # cv2.destroyAllWindows()
+    img = cv2IP.BaseIP.ImRead(srcImg)
+    Hist = cv2IP.HistIP()
+    # mask_G = Hist.ImBGR2Gray(img)
+    # mono = Hist.MonoEqualize(mask_G)
+    # GrayHist = Hist.CalcGrayHist(mono)
+    # mask = Hist.ImBGRA2BGR(img)
+    color = Hist.ColorEqualize(img, cv2IP.ColorType.USE_RGB)
+    ColorHist = Hist.CalcColorHist(color)
+    cv2IP.BaseIP.ImShow('img', color)
+    # Hist.ShowGrayHist('a', GrayHist)
+    Hist.ShowColorHist('b', ColorHist)
+    cv2.waitKey(0)
+
 
