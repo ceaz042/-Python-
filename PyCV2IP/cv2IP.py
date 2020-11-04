@@ -113,7 +113,7 @@ class HistIP(BaseIP):
     def MonoEqualize(self, SrcGray):
         return cv2.equalizeHist(SrcGray)
     
-    def ColorEqualize(self, SrcColor, CType = ColorType.USE_YUV):
+    def ColorEqualize(self, SrcColor, CType = ColorType.USE_HSV):
         if CType == ColorType(1):
             Color = cv2.cvtColor(SrcColor, cv2.COLOR_BGRA2BGR)
             print('RGB')

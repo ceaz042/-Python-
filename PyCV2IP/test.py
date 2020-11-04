@@ -53,25 +53,30 @@ def Example_AlphaBlend():
     del aa
     return
 
-# Example_AlphaBlend()
+def Example_ColorHistEqualize(CType):
+    Hist = cv2IP.HistIP()
+    img = Hist.ImRead(srcImg)
+    img = cv2.resize(img, (1280, 720))
+    F_eq = Hist.ColorEqualize(img, CType)
+    Title = "ForeGround Color"
+    EQ_Title = "ForeGround Color Equalized"
+    Hist.ImWindow(Title)
+    Hist.ImShow(Title, img)
+    Hist.ImWindow(EQ_Title)
+    Hist.ImShow(EQ_Title, F_eq)
+
+    F_Hist = Hist.CalcColorHist(img)
+    Hist.ShowColorHist("Foreground Color Hist", F_Hist)
+    Feq_Hist = Hist.CalcColorHist(F_eq)
+    Hist.ShowColorHist("Foreground Color Equalized Hist", Feq_Hist)
+    del Hist
 
 if __name__ == '__main__':
     # srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\front.png"
-    srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\nature.jpg"
+    srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\pumpkin.jpg"
     BackGround = "C:\\VSCode\\Python\\OpenCV\\PyCV2IP\\imgs\\img03.jpg"
-
-    # cv2.destroyAllWindows()
-    img = cv2IP.BaseIP.ImRead(srcImg)
-    Hist = cv2IP.HistIP()
-    # mask_G = Hist.ImBGR2Gray(img)
-    # mono = Hist.MonoEqualize(mask_G)
-    # GrayHist = Hist.CalcGrayHist(mono)
-    # mask = Hist.ImBGRA2BGR(img)
-    color = Hist.ColorEqualize(img, cv2IP.ColorType.USE_RGB)
-    ColorHist = Hist.CalcColorHist(color)
-    cv2IP.BaseIP.ImShow('img', color)
-    # Hist.ShowGrayHist('a', GrayHist)
-    Hist.ShowColorHist('b', ColorHist)
+    # Example_AlphaBlend()
+    Example_ColorHistEqualize(CType=cv2IP.ColorType.USE_HSV)
     cv2.waitKey(0)
 
 
