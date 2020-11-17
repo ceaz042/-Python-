@@ -139,11 +139,13 @@ class HistIP(BaseIP):
             Color = cv2.merge((channel_Y, channel[1], channel[2]))
             Color = cv2.cvtColor(Color, cv2.COLOR_YUV2BGR)
             return Color
-    def HistMatching(self, SrcImg, RefImg, Ctype = ColorType.USE_HSV):
+    def HistMatching(self, SrcImg, RefImg, CType = ColorType.USE_HSV):
         def calculate_cdf(Hist):
             pdf = cv2.calcHist([Hist], [0], None, [256], [0, 256])
             cdf = pdf.cumsum()
-            normalized_cdf = cdf*float(pdf.max()/cdf.max())
+            # normalized_cdf = cdf*float(pdf.max()/cdf.max())
+            normalized_cdf = cdf/float(cdf.max())
+            return normalized_cdf
 
         def calculate_lookup(src_cdf, ref_cdf):
             lookup_table = np.zeros(256)
@@ -158,39 +160,73 @@ class HistIP(BaseIP):
             return lookup_table
 
         if CType == ColorType(1):
-            Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
-            print('RGB')
-            channel = cv2.split(Color)
+            #SrcImg
+            src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
+            src_channel = cv2.split(src_Color)
+            src_B_channel = src_channel[0]
+            src_G_channel = src_channel[1]
+            src_R_channel = src_channel[2]
+            src_cdf_B = calculate_cdf(src_B_channel)
+            src_cdf_G = calculate_cdf(src_G_channel)
+            src_cdf_R = calculate_cdf(src_R_channel)
+            #RefImg
+            ref_Color = cv2.cvtColor(RefImg, cv2.COLOR_BGRA2BGR)
+            ref_channel = cv2.split(ref_Color)
+            ref_B_channel = ref_channel[0]
+            ref_G_channel = ref_channel[1]
+            ref_R_channel = ref_channel[2]
+            ref_cdf_B = calculate_cdf(ref_B_channel)
+            ref_cdf_G = calculate_cdf(ref_G_channel)
+            ref_cdf_R = calculate_cdf(ref_R_channel)
+            #Calcilate_lookup
+            B_lookup_table = calculate_lookup(src_cdf_B, ref_cdf_B)
+            G_lookup_table = calculate_lookup(src_cdf_G, ref_cdf_G)
+            R_lookup_table = calculate_lookup(src_cdf_R, ref_cdf_R)
+            B_after_transform = cv2.LUT(src_B_channel, B_lookup_table)
+            G_after_transform = cv2.LUT(src_G_channel, G_lookup_table)
+            R_after_transform = cv2.LUT(src_R_channel, R_lookup_table)
+            img_after_matching = cv2.merge((B_after_transform, G_after_transform, R_after_transform))
+            img_after_matching = cv2.convertScaleAbs(img_after_matching)
+            return img_after_matching
 
         if CType == ColorType(2):
             #SrcImg
             Src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2HSV)
             src_channel = cv2.split(Src_Color)
+            src_H_channel = src_channel[0].astype(float)
+            src_S_channel = src_channel[1].astype(float)
             src_V_channel = src_channel[2]
             src_cdf_V = calculate_cdf(src_V_channel)
             #RefImg
-            ref_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2HSV)
-            ref_channel = cv2.split(Src_Color)
+            ref_Color = cv2.cvtColor(RefImg, cv2.COLOR_BGR2HSV)
+            ref_channel = cv2.split(ref_Color)
             ref_V_channel = ref_channel[2]
             ref_cdf_V = calculate_cdf(ref_V_channel)
             #Calcilate_lookup
+            V_lookup_table = calculate_lookup(src_cdf_V, ref_cdf_V)
+            V_after_transform = cv2.LUT(src_V_channel, V_lookup_table)
+            img_after_matching = cv2.merge([src_H_channel, src_S_channel, V_after_transform])
+            img_after_matching = cv2.convertScaleAbs(img_after_matching)
+            img_after_matching = cv2.cvtColor(img_after_matching, cv2.COLOR_HSV2BGR)
+            return img_after_matching
 
         if CType == ColorType(3):
             #SrcImg
             Src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2YUV)
             src_channel = cv2.split(Src_Color)
             src_Y_channel = src_channel[0]
+            src_U_channel = src_channel[1].astype(float)
+            src_V_channel = src_channel[2].astype(float)
             src_cdf_Y = calculate_cdf(src_Y_channel)
             #RefImg
-            ref_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2YUV)
-            ref_channel = cv2.split(Src_Color)
+            ref_Color = cv2.cvtColor(RefImg, cv2.COLOR_BGR2YUV)
+            ref_channel = cv2.split(ref_Color)
             ref_Y_channel = ref_channel[0]
             ref_cdf_Y = calculate_cdf(ref_Y_channel)
             #Calcilate_lookup
             Y_lookup_table = calculate_lookup(src_cdf_Y, ref_cdf_Y)
             Y_after_transform = cv2.LUT(src_Y_channel, Y_lookup_table)
-            img_after_matching = cv2.merge([Y_after_transform, src_channel[1], src_channel[2]])
+            img_after_matching = cv2.merge((Y_after_transform, src_U_channel, src_V_channel))
+            img_after_matching = cv2.convertScaleAbs(img_after_matching)
+            img_after_matching = cv2.cvtColor(img_after_matching, cv2.COLOR_YUV2BGR)
             return img_after_matching
-
-
-      
