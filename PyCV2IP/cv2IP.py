@@ -86,15 +86,19 @@ class HistIP(BaseIP):
         Hist.append(b_hist)
         Hist.append(g_hist)
         Hist.append(r_hist)
+        ColorHist = np.array(Hist)
         # print(len(Hist))
-        return Hist
+        return ColorHist
 
     def ShowColorHist(self, Winname, ColorHist):
         histImage = np.zeros((self.__H, self.__W, 3), np.uint8)
-        hist = np.array(ColorHist)
-        b_hist = hist[0]
-        g_hist = hist[1]
-        r_hist = hist[2]
+        # hist = np.array(ColorHist)
+        b_hist = ColorHist[0]
+        g_hist = ColorHist[1]
+        r_hist = ColorHist[2]
+        # b_hist = hist[0]
+        # g_hist = hist[1]
+        # r_hist = hist[2]
         cv2.normalize(b_hist, b_hist, alpha=0, beta=self.__H, norm_type=cv2.NORM_MINMAX)
         cv2.normalize(g_hist, g_hist, alpha=0, beta=self.__H, norm_type=cv2.NORM_MINMAX)
         cv2.normalize(r_hist, r_hist, alpha=0, beta=self.__H, norm_type=cv2.NORM_MINMAX)
@@ -160,6 +164,7 @@ class HistIP(BaseIP):
             return lookup_table
 
         if CType == ColorType(1):
+            print('RGB')
             #SrcImg
             src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
             src_channel = cv2.split(src_Color)
@@ -190,6 +195,7 @@ class HistIP(BaseIP):
             return img_after_matching
 
         if CType == ColorType(2):
+            print('HSV')
             #SrcImg
             Src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2HSV)
             src_channel = cv2.split(Src_Color)
@@ -211,6 +217,7 @@ class HistIP(BaseIP):
             return img_after_matching
 
         if CType == ColorType(3):
+            print('YUV')
             #SrcImg
             Src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2YUV)
             src_channel = cv2.split(Src_Color)
