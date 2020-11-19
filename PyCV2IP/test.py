@@ -70,87 +70,23 @@ def Example_ColorHistEqualize_Original(CType):
     Hist.ShowColorHist("Foreground Color Equalized Hist", Feq_Hist)
     del Hist
 
-def Example_ColorHistEqualize():
-    def click_event(event, x, y, flags, param):
-        global sign
-        if event == cv2.EVENT_LBUTTONDOWN:
-            sign += 1
-            if sign >3:
-                sign = 1
-            F_eq = Hist.ColorEqualize(img, CType=cv2IP.ColorType(sign))
-            Hist.ImWindow(EQ_Title)
-            Hist.ImShow(EQ_Title, F_eq)
-            Feq_Hist = Hist.CalcColorHist(F_eq)
-            Hist.ShowColorHist("Foreground Color Equalized Hist", Feq_Hist)
-        if event == cv2.EVENT_RBUTTONDBLCLK:
-            sign -= 1
-            if sign <1:
-                sign = 3
-            F_eq = Hist.ColorEqualize(img, CType=cv2IP.ColorType(sign))
-            Hist.ImWindow(EQ_Title)
-            Hist.ImShow(EQ_Title, F_eq)
-            Feq_Hist = Hist.CalcColorHist(F_eq)
-            Hist.ShowColorHist("Foreground Color Equalized Hist", Feq_Hist)
-    global sign
-    sign = 1
-    Hist = cv2IP.HistIP()
-    img = Hist.ImRead(srcImg)
-    # img = cv2.resize(img, (640, 480))
-    while True:        
-        cv2.setMouseCallback(Title, click_event)
-        Hist.ImWindow(Title)
-        Hist.ImShow(Title, img)
-        F_Hist = Hist.CalcColorHist(img)
-        Hist.ShowColorHist("Foreground Color Hist", F_Hist)        
-        key = cv2.waitKey(30)
-        if key == ord('q') or key == 27:
-            del Hist
-            break
-
 def Mid_Project():
-    def click_event(event, x, y, flags, param):
-        global sign
-        if event == cv2.EVENT_LBUTTONDOWN:
-            sign += 1
-            if sign >3:
-                sign = 1
-            outImg = Hist.HistMatching(src_img, ref_img, CType=cv2IP.ColorType(sign))
-            Hist.ImShow("out img", outImg)
-            out_Hist = Hist.CalcColorHist(outImg)
-            out_Hist_cdf = out_Hist.cumsum()
-            Hist.ShowColorHist("Hist after matching", out_Hist_cdf)
+    ip = cv2IP.HistIP()
+    srcImg_dir = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\aspens_in_fall.jpg"
+    refImg_dir = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\forest-resized.jpg"
+    srcImg = ip.ImRead(srcImg_dir)
+    refImg = ip.ImRead(refImg_dir)
 
-            # F_eq = Hist.ColorEqualize(img, CType=cv2IP.ColorType(sign))
-            # Hist.ImWindow(EQ_Title)
-            # Hist.ImShow(EQ_Title, F_eq)
-            # Feq_Hist = Hist.CalcColorHist(F_eq)
-            # Hist.ShowColorHist("Foreground Color Equalized Hist", Feq_Hist)
-        if event == cv2.EVENT_RBUTTONDBLCLK:
-            sign -= 1
-            if sign <1:
-                sign = 3
-            outImg = Hist.HistMatching(src_img, ref_img, CType=cv2IP.ColorType(sign))
-            outImg = Hist.HistMatching(src_img, ref_img, CType=cv2IP.ColorType(sign))
-            Hist.ImShow("out img", outImg)
-            out_Hist = Hist.CalcColorHist(outImg)
-            out_Hist_cdf = out_Hist.cumsum()
-            Hist.ShowColorHist("Hist after matching", out_Hist_cdf)
-    global sign
-    sign = 1
-    Hist = cv2IP.HistIP()
-    src_img = Hist.ImRead(srcImg)
-    ref_img = Hist.ImRead(refImg)
-    # img = cv2.resize(img, (640, 480))
-    while True:        
-        cv2.setMouseCallback(Title, click_event)
-        Hist.ImShow("ref img", ref_img)
-        Hist.ImShow(Title, src_img)
-        O_Hist = Hist.CalcColorHist(src_img)
-        Hist.ShowColorHist("Original Color Hist", O_Hist)     
-        key = cv2.waitKey(30)
-        if key == ord('q') or key == 27:
-            del Hist
-            break
+    outImg = ip.HistMatching(srcImg, refImg, cv2IP.ColorType.USE_YUV)
+    
+    ip.ImShow("ref img", refImg)
+    ip.ImShow("src img", srcImg)
+    ip.ImShow("out img", outImg)
+    O_Hist = ip.CalcColorHist(srcImg)
+    ip.ShowColorHist("Original Color Hist", O_Hist)
+    out_Hist = ip.CalcColorHist(outImg)
+    ip.ShowColorHist("Hist after matching", out_Hist)
+    del ip
 
 if __name__ == '__main__':
     srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\ref.jpg"
@@ -159,7 +95,7 @@ if __name__ == '__main__':
     BackGround = "C:\\VSCode\\Python\\OpenCV\\PyCV2IP\\imgs\\img03.jpg"
     # Example_AlphaBlend()
     Title = "Original Image"
-    EQ_Title = "ForeGround Color Equalized"
+    EQ_Title = "Image Color Equalized"
     # Example_ColorHistEqualize_Original(CType=cv2IP.ColorType.USE_YUV)
     Mid_Project()
 

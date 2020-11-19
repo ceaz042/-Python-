@@ -120,7 +120,7 @@ class HistIP(BaseIP):
     def ColorEqualize(self, SrcColor, CType = ColorType.USE_HSV):
         if CType == ColorType(1):
             Color = cv2.cvtColor(SrcColor, cv2.COLOR_BGRA2BGR)
-            print('RGB')
+            # print('RGB')
             channel = cv2.split(Color)
             channel_B = cv2.equalizeHist(channel[0])
             channel_G = cv2.equalizeHist(channel[1])
@@ -129,7 +129,7 @@ class HistIP(BaseIP):
             return Color
         if CType == ColorType(2):
             Color = cv2.cvtColor(SrcColor, cv2.COLOR_BGR2HSV)
-            print('HSV')
+            # print('HSV')
             channel = cv2.split(Color)
             channel_V = cv2.equalizeHist(channel[2])
             Color = cv2.merge((channel[0], channel[1], channel_V))
@@ -137,7 +137,7 @@ class HistIP(BaseIP):
             return Color
         if CType == ColorType(3):
             Color = cv2.cvtColor(SrcColor, cv2.COLOR_BGR2YUV)
-            print('YUV')
+            # print('YUV')
             channel = cv2.split(Color)
             channel_Y = cv2.equalizeHist(channel[0])
             Color = cv2.merge((channel_Y, channel[1], channel[2]))
@@ -146,7 +146,8 @@ class HistIP(BaseIP):
     def HistMatching(self, SrcImg, RefImg, CType = ColorType.USE_HSV):
         def calculate_cdf(Hist):
             pdf = cv2.calcHist([Hist], [0], None, [256], [0, 256])
-            cdf = pdf.cumsum()
+            # cdf = pdf.cumsum()
+            cdf = np.cumsum(pdf)
             # normalized_cdf = cdf*float(pdf.max()/cdf.max())
             normalized_cdf = cdf/float(cdf.max())
             return normalized_cdf
@@ -164,7 +165,7 @@ class HistIP(BaseIP):
             return lookup_table
 
         if CType == ColorType(1):
-            print('RGB')
+            # print('RGB')
             #SrcImg
             src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
             src_channel = cv2.split(src_Color)
@@ -195,7 +196,7 @@ class HistIP(BaseIP):
             return img_after_matching
 
         if CType == ColorType(2):
-            print('HSV')
+            # print('HSV')
             #SrcImg
             Src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2HSV)
             src_channel = cv2.split(Src_Color)
@@ -217,7 +218,7 @@ class HistIP(BaseIP):
             return img_after_matching
 
         if CType == ColorType(3):
-            print('YUV')
+            # print('YUV')
             #SrcImg
             Src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2YUV)
             src_channel = cv2.split(Src_Color)
