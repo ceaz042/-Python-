@@ -163,14 +163,14 @@ class Application(ttk.Frame):
                 outImg = Hist.HistMatching(src_img, ref_img, CType=cv2IP.ColorType(sign))
                 Hist.ImShow("Output image", outImg)
                 out_Hist = Hist.CalcColorHist(outImg)
-                final_Hist = []
-                for i in range(len(out_Hist)):
-                    cdf_Hist = np.cumsum(out_Hist[i])
-                    a = cdf_Hist.tolist()
-                    final_Hist.append(a)
-                final_Hist = np.array(final_Hist)
-                # Hist.ShowColorHist("Hist after matching", out_Hist_cdf)
-                Hist.ShowColorHist("Hist after matching", final_Hist)
+                # final_Hist = []
+                # for i in range(len(out_Hist)):
+                #     cdf_Hist = np.cumsum(out_Hist[i])
+                #     a = cdf_Hist.tolist()
+                #     final_Hist.append(a)
+                # final_Hist = np.array(final_Hist)
+                # # Hist.ShowColorHist("Hist after matching", out_Hist_cdf)
+                # Hist.ShowColorHist("Hist after matching", final_Hist)
 
             if event == cv2.EVENT_RBUTTONDBLCLK:
                 sign -= 1
@@ -179,14 +179,15 @@ class Application(ttk.Frame):
                 outImg = Hist.HistMatching(src_img, ref_img, CType=cv2IP.ColorType(sign))
                 Hist.ImShow("Output image", outImg)
                 out_Hist = Hist.CalcColorHist(outImg)
-                final_Hist = []
-                for i in range(len(out_Hist)):
-                    cdf_Hist = np.cumsum(out_Hist[i])
-                    a = cdf_Hist.tolist()
-                    final_Hist.append(a)
-                final_Hist = np.array(final_Hist)                
-                Hist.ShowColorHist("Hist after matching", final_Hist)
-                # Hist.ShowColorHist("Hist after matching", out_Hist)
+                # final_Hist = []
+                # for i in range(len(out_Hist)):
+                #     cdf_Hist = np.cumsum(out_Hist[i])
+
+                #     a = cdf_Hist.tolist()
+                #     final_Hist.append(a)
+                # final_Hist = np.array(final_Hist)                
+                # Hist.ShowColorHist("Hist after matching", final_Hist)
+                # # Hist.ShowColorHist("Hist after matching", out_Hist)
         global sign
         sign = 1
         Hist = cv2IP.HistIP()

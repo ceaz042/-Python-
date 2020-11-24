@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import enum
 import os
-from matplotlib import pyplot as plt
 
 class BaseIP:
     @staticmethod
@@ -191,6 +190,18 @@ class HistIP(BaseIP):
             B_after_transform = cv2.LUT(src_B_channel, B_lookup_table)
             G_after_transform = cv2.LUT(src_G_channel, G_lookup_table)
             R_after_transform = cv2.LUT(src_R_channel, R_lookup_table)
+            Histogram = []
+            result_S = src_cdf_B.tolist()
+            result_R = ref_cdf_B.tolist()
+            result_Ori = B_after_transform.astype(np.uint8)
+            result_Ori = calculate_cdf(result_Ori)
+            result_O = result_Ori.tolist()
+            Histogram.append(result_S)
+            Histogram.append(result_R)
+            Histogram.append(result_O)
+            Histogram = np.array(Histogram)
+            # Histogram = cv2.convertScaleAbs(Histogram)
+            self.ShowColorHist("Hist after matching", Histogram)
             img_after_matching = cv2.merge((B_after_transform, G_after_transform, R_after_transform))
             img_after_matching = cv2.convertScaleAbs(img_after_matching)
             return img_after_matching
@@ -212,6 +223,18 @@ class HistIP(BaseIP):
             #Calcilate_lookup
             V_lookup_table = calculate_lookup(src_cdf_V, ref_cdf_V)
             V_after_transform = cv2.LUT(src_V_channel, V_lookup_table)
+            Histogram = []
+            result_S = src_cdf_V.tolist()
+            result_R = ref_cdf_V.tolist()
+            result_Ori = V_after_transform.astype(np.uint8)
+            result_Ori = calculate_cdf(result_Ori)
+            result_O = result_Ori.tolist()
+            Histogram.append(result_S)
+            Histogram.append(result_R)
+            Histogram.append(result_O)
+            Histogram = np.array(Histogram)
+            # Histogram = cv2.convertScaleAbs(Histogram)
+            self.ShowColorHist("Hist after matching", Histogram)
             img_after_matching = cv2.merge([src_H_channel, src_S_channel, V_after_transform])
             img_after_matching = cv2.convertScaleAbs(img_after_matching)
             img_after_matching = cv2.cvtColor(img_after_matching, cv2.COLOR_HSV2BGR)
@@ -234,6 +257,18 @@ class HistIP(BaseIP):
             #Calcilate_lookup
             Y_lookup_table = calculate_lookup(src_cdf_Y, ref_cdf_Y)
             Y_after_transform = cv2.LUT(src_Y_channel, Y_lookup_table)
+            Histogram = []
+            result_S = src_cdf_Y.tolist()
+            result_R = ref_cdf_Y.tolist()
+            result_Ori = Y_after_transform.astype(np.uint8)
+            result_Ori = calculate_cdf(result_Ori)
+            result_O = result_Ori.tolist()
+            Histogram.append(result_S)
+            Histogram.append(result_R)
+            Histogram.append(result_O)
+            Histogram = np.array(Histogram)
+            # Histogram = cv2.convertScaleAbs(Histogram)
+            self.ShowColorHist("Hist after matching", Histogram)
             img_after_matching = cv2.merge((Y_after_transform, src_U_channel, src_V_channel))
             img_after_matching = cv2.convertScaleAbs(img_after_matching)
             img_after_matching = cv2.cvtColor(img_after_matching, cv2.COLOR_YUV2BGR)
