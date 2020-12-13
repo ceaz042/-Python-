@@ -49,6 +49,20 @@ class ColorType(enum.IntEnum):
     USE_HSV = 2
     USE_YUV = 3
 
+class SmoothType(enum.IntEnum):
+    BLUR = 1
+    BOX = 2
+    GAUSSIAN = 3
+    MEDIAN = 4
+    BILATERAL = 5
+
+class EdgeType(enum.IntEnum):
+    SOBEL = 1
+    CANNY = 2
+    SCHARR = 3
+    LAPLACE = 4
+    COLOR_SOBEL = 5
+
 class HistIP(BaseIP):
     def __init__(self):
         self.__H = 384
@@ -119,7 +133,7 @@ class HistIP(BaseIP):
     def ColorEqualize(self, SrcColor, CType = ColorType.USE_HSV):
         if CType == ColorType(1):
             Color = cv2.cvtColor(SrcColor, cv2.COLOR_BGRA2BGR)
-            # print('RGB')
+            print('RGB')
             channel = cv2.split(Color)
             channel_B = cv2.equalizeHist(channel[0])
             channel_G = cv2.equalizeHist(channel[1])
@@ -128,7 +142,7 @@ class HistIP(BaseIP):
             return Color
         if CType == ColorType(2):
             Color = cv2.cvtColor(SrcColor, cv2.COLOR_BGR2HSV)
-            # print('HSV')
+            print('HSV')
             channel = cv2.split(Color)
             channel_V = cv2.equalizeHist(channel[2])
             Color = cv2.merge((channel[0], channel[1], channel_V))
@@ -136,7 +150,7 @@ class HistIP(BaseIP):
             return Color
         if CType == ColorType(3):
             Color = cv2.cvtColor(SrcColor, cv2.COLOR_BGR2YUV)
-            # print('YUV')
+            print('YUV')
             channel = cv2.split(Color)
             channel_Y = cv2.equalizeHist(channel[0])
             Color = cv2.merge((channel_Y, channel[1], channel[2]))
@@ -164,7 +178,7 @@ class HistIP(BaseIP):
             return lookup_table
 
         if CType == ColorType(1):
-            # print('RGB')
+            print('RGB')
             #SrcImg
             src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
             src_channel = cv2.split(src_Color)
@@ -203,11 +217,10 @@ class HistIP(BaseIP):
             # Histogram = cv2.convertScaleAbs(Histogram)
             self.ShowColorHist("Hist after matching", Histogram)
             img_after_matching = cv2.merge((B_after_transform, G_after_transform, R_after_transform))
-            img_after_matching = cv2.convertScaleAbs(img_after_matching)
-            return img_after_matching
+            return img_after_matching.astype(np.uint8)
 
         if CType == ColorType(2):
-            # print('HSV')
+            print('HSV')
             #SrcImg
             Src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2HSV)
             src_channel = cv2.split(Src_Color)
@@ -236,12 +249,12 @@ class HistIP(BaseIP):
             # Histogram = cv2.convertScaleAbs(Histogram)
             self.ShowColorHist("Hist after matching", Histogram)
             img_after_matching = cv2.merge([src_H_channel, src_S_channel, V_after_transform])
-            img_after_matching = cv2.convertScaleAbs(img_after_matching)
+            img_after_matching = img_after_matching.astype(np.uint8)
             img_after_matching = cv2.cvtColor(img_after_matching, cv2.COLOR_HSV2BGR)
             return img_after_matching
 
         if CType == ColorType(3):
-            # print('YUV')
+            print('YUV')
             #SrcImg
             Src_Color = cv2.cvtColor(SrcImg, cv2.COLOR_BGR2YUV)
             src_channel = cv2.split(Src_Color)
@@ -270,6 +283,78 @@ class HistIP(BaseIP):
             # Histogram = cv2.convertScaleAbs(Histogram)
             self.ShowColorHist("Hist after matching", Histogram)
             img_after_matching = cv2.merge((Y_after_transform, src_U_channel, src_V_channel))
-            img_after_matching = cv2.convertScaleAbs(img_after_matching)
+            img_after_matching = img_after_matching.astype(np.uint8)
             img_after_matching = cv2.cvtColor(img_after_matching, cv2.COLOR_YUV2BGR)
             return img_after_matching
+
+class ConvIP(BaseIP):
+    def Smooth2D(self, SrcImg, ksize = 15, SmType = SmoothType.BLUR):
+        if SmType == SmoothType(1):
+            result = cv2.blur(SrcImg, (ksize, ksize))
+            return result
+        if SmType == SmoothType(2):
+            result = cv2.boxFilter(SrcImg, -1, (ksize, ksize))
+            return result
+        if SmType == SmoothType(3):
+            result = cv2.GaussianBlur(SrcImg, (ksize, ksize), 0)
+            return result
+        if SmType == SmoothType(4):
+            result = cv2.medianBlur(SrcImg, ksize)
+            return result
+        if SmType == SmoothType(5):
+            result = cv2.bilateralFilter(SrcImg, ksize, ksize*2, ksize/2)
+            return result
+        
+    def EdgeDetect(self, SrcImg, EdType = EdgeType.SOBEL):
+        if EdType == EdgeType(1):
+            # window_name = ('Sobel Edge Detector')
+            ddepth = cv2.CV_16S
+            src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
+            gray = HistIP.ImBGR2Gray(self, src)
+            grad_x = cv2.Sobel(gray, ddepth, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+            grad_y = cv2.Sobel(gray, ddepth, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+            abs_grad_x = cv2.convertScaleAbs(grad_x)
+            abs_grad_y = cv2.convertScaleAbs(grad_y)
+            grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+            return grad
+        if EdType == EdgeType(2):
+            # window_name = "Canny Edge Detector"
+            # max_lowThreshold = 100
+            low_threshold = 100
+            ratio = 3
+            kernel_size = 3
+            img_blur = self.Smooth2D(SrcImg, ksize=3, SmType=SmoothType.BLUR)
+            detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
+            return detected_edges
+        if EdType == EdgeType(3):
+            ddepth = cv2.CV_16S
+            src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
+            gray = HistIP.ImBGR2Gray(self, src)
+            grad_x = cv2.Scharr(gray, ddepth, 1, 0, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+            grad_y = cv2.Scharr(gray, ddepth, 0, 1, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+            abs_grad_x = cv2.convertScaleAbs(grad_x)
+            abs_grad_y = cv2.convertScaleAbs(grad_y)
+            grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+            return grad
+        if EdType == EdgeType(4):
+            ddepth = cv2.CV_16S
+            kernel_size = 3
+            src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
+            gray = HistIP.ImBGR2Gray(self, src)
+            dst = cv2.Laplacian(gray, ddepth, ksize=kernel_size)
+            # converting back to uint8
+            abs_dst = cv2.convertScaleAbs(dst)
+            return abs_dst            
+        if EdType == EdgeType(5):
+            # window_name = "Color Sobel Edge Detector"
+            ddepth = cv2.CV_16S
+            src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
+            src_x = cv2.Sobel(src, ddepth, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+            src_y = cv2.Sobel(src, ddepth, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+            abs_src_x = cv2.convertScaleAbs(src_x)
+            abs_src_y = cv2.convertScaleAbs(src_y)
+            grad = cv2.addWeighted(abs_src_x, 0.5, abs_src_y, 0.5, 0)
+            return grad
+
+
+

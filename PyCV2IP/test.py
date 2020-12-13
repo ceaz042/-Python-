@@ -88,15 +88,40 @@ def Mid_Project():
     ip.ShowColorHist("Hist after matching", out_Hist)
     del ip
 
+def Example_Smooth(smType):
+    ip = cv2IP.ConvIP()
+    img = ip.ImRead(srcImg)
+    ip.ImShow("original image", img)
+    outImg = ip.Smooth2D(img, 5, smType)
+    ip.ImShow("smoothed image -5", outImg)
+    outImg = ip.Smooth2D(img, 15, smType)
+    ip.ImShow("smoothed image -15", outImg)
+    del ip
+
+def Example_ImEdge(EdType):
+    ip = cv2IP.ConvIP()
+    Img = ip.ImRead(srcImg)
+    outImg = ip.EdgeDetect(Img, EdType)
+    if (EdType == cv2IP.EdgeType(1)):
+        ip.ImShow("Sobel Edge", outImg)
+    elif (EdType == cv2IP.EdgeType(2)):
+        ip.ImShow("Canny Edge", outImg)
+    elif (EdType == cv2IP.EdgeType(3)):
+        ip.ImShow("Scharr Edge", outImg)
+    elif (EdType == cv2IP.EdgeType(4)):
+        ip.ImShow("Laplacian Edge", outImg)
+    elif (EdType == cv2IP.EdgeType(5)):
+        ip.ImShow("Color Sobel Edge", outImg)
+    del ip
+
 if __name__ == '__main__':
-    srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\ref.jpg"
+    # srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\ref.jpg"
     refImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\src.jpg"
-    # srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\lollipop.png"
+    srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\nature.jpg"
     BackGround = "C:\\VSCode\\Python\\OpenCV\\PyCV2IP\\imgs\\img03.jpg"
     # Example_AlphaBlend()
     Title = "Original Image"
     EQ_Title = "Image Color Equalized"
     # Example_ColorHistEqualize_Original(CType=cv2IP.ColorType.USE_YUV)
-    Mid_Project()
-
-    # cv2.waitKey(0)
+    Example_ImEdge(EdType=cv2IP.EdgeType(1))
+    cv2.waitKey(0)
