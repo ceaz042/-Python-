@@ -63,6 +63,12 @@ class EdgeType(enum.IntEnum):
     LAPLACE = 4
     COLOR_SOBEL = 5
 
+class SharpType(enum.IntEnum):
+    LAPLACE_TYPE1 = 1
+    LAPLACE_TYPE2 = 2
+    SECOND_ORDER_LOG = 3
+    UNSHARP_MASK = 4
+
 class HistIP(BaseIP):
     def __init__(self):
         self.__H = 384
@@ -355,6 +361,27 @@ class ConvIP(BaseIP):
             abs_src_y = cv2.convertScaleAbs(src_y)
             grad = cv2.addWeighted(abs_src_x, 0.5, abs_src_y, 0.5, 0)
             return grad
+    def ImSharpening(self, SrcImg, SpType=SharpType.UNSHARP_MASK, Gain=0.5, SmType=SmoothType.GAUSSIAN):
+        if SpType == SharpType(1):
+            kernel = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
+            result = cv2.filter2D(SrcImg, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            output = cv2.addWeighted(SrcImg, 1, result, Gain, 0)
+            return output
 
+        if SpType == SharpType(2):
+            kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+            result = cv2.filter2D(SrcImg, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            output = cv2.addWeighted(SrcImg, 1, result, Gain, 0)
+            return output
 
+        if SpType == SharpType(3):
+            kernel = np.array([[0, 0, -1, 0, 0], [0, -1, -2, -1, 0], [-1, -2, 16, -2, -1], [0, -1, -2, -1, 0], [0, 0, -1, 0, 0]])
+            result = cv2.filter2D(SrcImg, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            output = cv2.addWeighted(SrcImg, 1, result, Gain, 0)
+            return output
 
+        if SpType == SharpType(4):
+            smooth = self.Smooth2D(SrcImg, 9, SmType)
+            output = cv2.addWeighted(SrcImg, 1+Gain, smooth, Gain*-1, 0, SrcImg)
+            return output       
+        

@@ -114,14 +114,24 @@ def Example_ImEdge(EdType):
         ip.ImShow("Color Sobel Edge", outImg)
     del ip
 
+def Example_ImSharpening(SpType):
+    ip = cv2IP.ConvIP()
+    Img = ip.ImRead(srcImg)    
+    cv2.imshow("original", Img)
+    DstImg = ip.ImSharpening(Img, SpType)
+    cv2.imshow("result", DstImg)
+    del ip
+
 if __name__ == '__main__':
-    # srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\ref.jpg"
+    srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\ref.jpg"
     refImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\src.jpg"
-    srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\nature.jpg"
+    # srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\nature.jpg"
     BackGround = "C:\\VSCode\\Python\\OpenCV\\PyCV2IP\\imgs\\img03.jpg"
     # Example_AlphaBlend()
     Title = "Original Image"
     EQ_Title = "Image Color Equalized"
     # Example_ColorHistEqualize_Original(CType=cv2IP.ColorType.USE_YUV)
-    Example_ImEdge(EdType=cv2IP.EdgeType(1))
+    # Example_ImEdge(EdType=cv2IP.EdgeType(2))
+    Example_ImSharpening(SpType=cv2IP.SharpType(4))
+    # Example_Smooth(smType=cv2IP.SmoothType(5))
     cv2.waitKey(0)
