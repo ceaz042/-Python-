@@ -296,23 +296,29 @@ class HistIP(BaseIP):
 class ConvIP(BaseIP):
     def Smooth2D(self, SrcImg, ksize = 15, SmType = SmoothType.BLUR):
         if SmType == SmoothType(1):
+            print('BLUR')
             result = cv2.blur(SrcImg, (ksize, ksize))
             return result
         if SmType == SmoothType(2):
+            print('BOX')
             result = cv2.boxFilter(SrcImg, -1, (ksize, ksize))
             return result
         if SmType == SmoothType(3):
+            print('GAUSSIAN')
             result = cv2.GaussianBlur(SrcImg, (ksize, ksize), 0)
             return result
         if SmType == SmoothType(4):
+            print('MEDIAN')
             result = cv2.medianBlur(SrcImg, ksize)
             return result
         if SmType == SmoothType(5):
+            print('BILATERAL')
             result = cv2.bilateralFilter(SrcImg, ksize, ksize*2, ksize/2)
             return result
         
     def EdgeDetect(self, SrcImg, EdType = EdgeType.SOBEL):
         if EdType == EdgeType(1):
+            print('SOBEL')
             # window_name = ('Sobel Edge Detector')
             ddepth = cv2.CV_16S
             src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
@@ -324,6 +330,7 @@ class ConvIP(BaseIP):
             grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
             return grad
         if EdType == EdgeType(2):
+            print('CANNY')
             # window_name = "Canny Edge Detector"
             # max_lowThreshold = 100
             low_threshold = 100
@@ -333,6 +340,7 @@ class ConvIP(BaseIP):
             detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
             return detected_edges
         if EdType == EdgeType(3):
+            print('SCHARR')
             ddepth = cv2.CV_16S
             src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
             gray = HistIP.ImBGR2Gray(self, src)
@@ -343,6 +351,7 @@ class ConvIP(BaseIP):
             grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
             return grad
         if EdType == EdgeType(4):
+            print('LAPLACE')
             ddepth = cv2.CV_16S
             kernel_size = 3
             src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
@@ -352,6 +361,7 @@ class ConvIP(BaseIP):
             abs_dst = cv2.convertScaleAbs(dst)
             return abs_dst            
         if EdType == EdgeType(5):
+            print('COLOR_SOBEL')
             # window_name = "Color Sobel Edge Detector"
             ddepth = cv2.CV_16S
             src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
@@ -363,25 +373,32 @@ class ConvIP(BaseIP):
             return grad
     def ImSharpening(self, SrcImg, SpType=SharpType.UNSHARP_MASK, Gain=0.5, SmType=SmoothType.GAUSSIAN):
         if SpType == SharpType(1):
+            print('LAPLACE_TYPE1')
+            Img = SrcImg
             kernel = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
-            result = cv2.filter2D(SrcImg, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
-            output = cv2.addWeighted(SrcImg, 1, result, Gain, 0)
+            result = cv2.filter2D(Img, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            output = cv2.addWeighted(Img, 1, result, Gain, 0)
             return output
 
         if SpType == SharpType(2):
+            print('LAPLACE_TYPE2')
+            Img = SrcImg
             kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
-            result = cv2.filter2D(SrcImg, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
-            output = cv2.addWeighted(SrcImg, 1, result, Gain, 0)
+            result = cv2.filter2D(Img, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            output = cv2.addWeighted(Img, 1, result, Gain, 0)
             return output
 
         if SpType == SharpType(3):
+            print('SECOND_ORDER_LOG')
+            Img = SrcImg
             kernel = np.array([[0, 0, -1, 0, 0], [0, -1, -2, -1, 0], [-1, -2, 16, -2, -1], [0, -1, -2, -1, 0], [0, 0, -1, 0, 0]])
-            result = cv2.filter2D(SrcImg, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
-            output = cv2.addWeighted(SrcImg, 1, result, Gain, 0)
+            result = cv2.filter2D(Img, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            output = cv2.addWeighted(Img, 1, result, Gain, 0)
             return output
 
         if SpType == SharpType(4):
-            smooth = self.Smooth2D(SrcImg, 9, SmType)
-            output = cv2.addWeighted(SrcImg, 1+Gain, smooth, Gain*-1, 0, SrcImg)
-            return output       
-        
+            print('UNSHARP_MASK')
+            Img = SrcImg
+            smooth = self.Smooth2D(Img, 9, SmType)
+            output = cv2.addWeighted(SrcImg, 1+Gain, smooth, Gain*-1, 0)
+            return output   
