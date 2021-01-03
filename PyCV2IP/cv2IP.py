@@ -20,6 +20,14 @@ class BaseIP:
     def ImWindow(winName):
         cv2.namedWindow(winName, cv2.WINDOW_AUTOSIZE)
 
+    @staticmethod
+    def ImBGR2Gray(SrcImg):
+        return cv2.cvtColor(SrcImg, cv2.COLOR_BGR2GRAY)
+
+    @staticmethod    
+    def ImBGRA2BGR(SrcImg):
+        return cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
+
 class AlhpaBlend(BaseIP):
     @staticmethod
     def SplitAlpha(SrcImg):
@@ -75,11 +83,13 @@ class HistIP(BaseIP):
         self.__W = 512
         self.__bin_w = int(round( self.__W/256 ))
 
-    def ImBGR2Gray(self, SrcImg):
-        return cv2.cvtColor(SrcImg, cv2.COLOR_BGR2GRAY)
+    # @staticmethod
+    # def ImBGR2Gray(SrcImg):
+    #     return cv2.cvtColor(SrcImg, cv2.COLOR_BGR2GRAY)
 
-    def ImBGRA2BGR(self, SrcImg):
-        return cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
+    # @staticmethod    
+    # def ImBGRA2BGR(SrcImg):
+    #     return cv2.cvtColor(SrcImg, cv2.COLOR_BGRA2BGR)
 
     def CalcGrayHist(self, SrcGray):
         return cv2.calcHist([SrcGray], [0], None, [256], [0, 256])
@@ -294,6 +304,21 @@ class HistIP(BaseIP):
             return img_after_matching
 
 class ConvIP(BaseIP):
+    def __init__(self):
+        self.__RobertsKernel = np.array([[[1, 0], [0, -1]], [[0, 1], [-1, 0]]])
+        self.__PrewittKernel = np.array([[[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]], [[-1, -1, -1], [0, 0, 0], [1, 1, 1]]])
+        self.__KirschKernel = np.array([[[-3, -3, 5], [-3, 0, 5], [-3, -3, 5]], [[-3, 5, 5], [-3, 0, 5], [-3, -3, -3]], [[5, 5, 5], [-3, 0, -3], [-3, -3, -3]], [[5, 5, -3], [5, 0, -3], [-3, -3, -3]] \
+            , [[5, -3, -3], [5, 0, -3], [5, -3, -3]], [[-3, -3, -3], [5, 0, -3], [5, 5, -3]], [[-3, -3, -3], [-3, 0, -3], [5, 5, 5]], [[-3, -3, -3], [-3, 0, 5], [-3, 5, 5]]])
+
+    def GetRobertsKernel(self):
+        return self.__RobertsKernel
+
+    def GetPrewittKernel(self):
+        return self.__PrewittKernel
+
+    def GetKirschKernel(self):
+        return self.__KirschKernel
+
     def Smooth2D(self, SrcImg, ksize = 15, SmType = SmoothType.BLUR):
         if SmType == SmoothType(1):
             print('BLUR')
@@ -322,7 +347,7 @@ class ConvIP(BaseIP):
             # window_name = ('Sobel Edge Detector')
             ddepth = cv2.CV_16S
             src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
-            gray = HistIP.ImBGR2Gray(self, src)
+            gray = BaseIP.ImBGR2Gray(src)
             grad_x = cv2.Sobel(gray, ddepth, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             grad_y = cv2.Sobel(gray, ddepth, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             abs_grad_x = cv2.convertScaleAbs(grad_x)
@@ -343,7 +368,7 @@ class ConvIP(BaseIP):
             print('SCHARR')
             ddepth = cv2.CV_16S
             src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
-            gray = HistIP.ImBGR2Gray(self, src)
+            gray = BaseIP.ImBGR2Gray(src)
             grad_x = cv2.Scharr(gray, ddepth, 1, 0, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             grad_y = cv2.Scharr(gray, ddepth, 0, 1, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             abs_grad_x = cv2.convertScaleAbs(grad_x)
@@ -355,7 +380,7 @@ class ConvIP(BaseIP):
             ddepth = cv2.CV_16S
             kernel_size = 3
             src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
-            gray = HistIP.ImBGR2Gray(self, src)
+            gray = BaseIP.ImBGR2Gray(src)
             dst = cv2.Laplacian(gray, ddepth, ksize=kernel_size)
             # converting back to uint8
             abs_dst = cv2.convertScaleAbs(dst)
@@ -371,6 +396,12 @@ class ConvIP(BaseIP):
             abs_src_y = cv2.convertScaleAbs(src_y)
             grad = cv2.addWeighted(abs_src_x, 0.5, abs_src_y, 0.5, 0)
             return grad
+
+    def Conv2D(self, SrcImg, Kernel):
+        result = cv2.filter2D(SrcImg, ddepth=-1, kernel=Kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+        return result
+
+            
     def ImSharpening(self, SrcImg, SpType=SharpType.UNSHARP_MASK, Gain=0.5, SmType=SmoothType.GAUSSIAN):
         if SpType == SharpType(1):
             print('LAPLACE_TYPE1')

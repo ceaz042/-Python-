@@ -114,6 +114,51 @@ def Example_ImEdge(EdType):
         ip.ImShow("Color Sobel Edge", outImg)
     del ip
 
+def Example_ImConv2D_Roberts():
+    ip = cv2IP.ConvIP()
+    Img = ip.ImRead(srcImg)    
+    ip.ImShow("original", Img)
+    src_gray = ip.ImBGR2Gray(Img)
+    kernels = ip.GetRobertsKernel()
+    grad_planes = []
+    for i in range(0, len(kernels)):
+        grad_planes.append(ip.Conv2D(src_gray, kernels[i]))
+        grad_planes[i] = cv2.convertScaleAbs(grad_planes[i])
+
+    GradImg = cv2.addWeighted(grad_planes[0], 0.5, grad_planes[i], 0.5, 0)
+    ip.ImShow("Rober Images", GradImg)
+    del ip
+
+def Example_ImConv2D_Prewitt():
+    ip = cv2IP.ConvIP()
+    Img = ip.ImRead(srcImg)    
+    ip.ImShow("original", Img)
+    src_gray = ip.ImBGR2Gray(Img)
+    kernels = ip.GetPrewittKernel()
+    grad_planes = []
+    for i in range(0, len(kernels)):
+        grad_planes.append(ip.Conv2D(src_gray, kernels[i]))
+        grad_planes[i] = cv2.convertScaleAbs(grad_planes[i])
+
+    GradImg = cv2.addWeighted(grad_planes[0], 0.5, grad_planes[i], 0.5, 0)
+    ip.ImShow("Prewitt Images", GradImg)
+    del ip
+
+def Example_ImConv2D_Kirsch():
+    ip = cv2IP.ConvIP()
+    Img = ip.ImRead(srcImg)    
+    ip.ImShow("original", Img)
+    src_gray = ip.ImBGR2Gray(Img)
+    kernels = ip.GetKirschKernel()
+    grad_planes = []
+    for i in range(0, len(kernels)):
+        grad_planes.append(ip.Conv2D(src_gray, kernels[i]))
+        grad_planes[i] = cv2.convertScaleAbs(grad_planes[i])
+
+    GradImg = cv2.addWeighted(grad_planes[0], 0.5, grad_planes[i], 0.5, 0)
+    ip.ImShow("Kirsch Images", GradImg)
+    del ip
+
 def Example_ImSharpening(SpType):
     ip = cv2IP.ConvIP()
     Img = ip.ImRead(srcImg)    
@@ -123,15 +168,17 @@ def Example_ImSharpening(SpType):
     del ip
 
 if __name__ == '__main__':
-    srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\ref.jpg"
+    # srcImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\ref.jpg"
     refImg = "C:\\VSCode\\Python\\OpenCV-Python--main\\PyCV2IP\\imgs\\src.jpg"
-    # srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\nature.jpg"
+    srcImg = "C:\\VSCode\\OpenCV\\PyCV2IP\\imgs\\nature.jpg"
     BackGround = "C:\\VSCode\\Python\\OpenCV\\PyCV2IP\\imgs\\img03.jpg"
     # Example_AlphaBlend()
     Title = "Original Image"
     EQ_Title = "Image Color Equalized"
     # Example_ColorHistEqualize_Original(CType=cv2IP.ColorType.USE_YUV)
     # Example_ImEdge(EdType=cv2IP.EdgeType(2))
-    Example_ImSharpening(SpType=cv2IP.SharpType(4))
+    # Example_ImSharpening(SpType=cv2IP.SharpType(4))
     # Example_Smooth(smType=cv2IP.SmoothType(5))
+    # Example_ImConv2D_Kirsch()
+    Example_ImConv2D_Prewitt()
     cv2.waitKey(0)
