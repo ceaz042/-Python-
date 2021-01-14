@@ -338,7 +338,7 @@ class ConvIP(BaseIP):
             return result
         if SmType == SmoothType(5):
             print('BILATERAL')
-            result = cv2.bilateralFilter(SrcImg, ksize, ksize*2, ksize/2)
+            result = cv2.bilateralFilter(SrcImg, ksize, 50, 25)
             return result
         
     def EdgeDetect(self, SrcImg, EdType = EdgeType.SOBEL):
@@ -346,8 +346,8 @@ class ConvIP(BaseIP):
             print('SOBEL')
             # window_name = ('Sobel Edge Detector')
             ddepth = cv2.CV_16S
-            src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
-            gray = BaseIP.ImBGR2Gray(src)
+            # src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
+            gray = BaseIP.ImBGR2Gray(SrcImg)
             grad_x = cv2.Sobel(gray, ddepth, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             grad_y = cv2.Sobel(gray, ddepth, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             abs_grad_x = cv2.convertScaleAbs(grad_x)
@@ -361,14 +361,14 @@ class ConvIP(BaseIP):
             low_threshold = 100
             ratio = 3
             kernel_size = 3
-            img_blur = self.Smooth2D(SrcImg, ksize=3, SmType=SmoothType.BLUR)
-            detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
+            # img_blur = self.Smooth2D(SrcImg, ksize=3, SmType=SmoothType.BLUR)
+            detected_edges = cv2.Canny(SrcImg, low_threshold, low_threshold*ratio, kernel_size)
             return detected_edges
         if EdType == EdgeType(3):
             print('SCHARR')
             ddepth = cv2.CV_16S
-            src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
-            gray = BaseIP.ImBGR2Gray(src)
+            # src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
+            gray = BaseIP.ImBGR2Gray(SrcImg)
             grad_x = cv2.Scharr(gray, ddepth, 1, 0, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             grad_y = cv2.Scharr(gray, ddepth, 0, 1, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             abs_grad_x = cv2.convertScaleAbs(grad_x)
@@ -379,8 +379,8 @@ class ConvIP(BaseIP):
             print('LAPLACE')
             ddepth = cv2.CV_16S
             kernel_size = 3
-            src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
-            gray = BaseIP.ImBGR2Gray(src)
+            # src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
+            gray = BaseIP.ImBGR2Gray(SrcImg)
             dst = cv2.Laplacian(gray, ddepth, ksize=kernel_size)
             # converting back to uint8
             abs_dst = cv2.convertScaleAbs(dst)
@@ -389,9 +389,9 @@ class ConvIP(BaseIP):
             print('COLOR_SOBEL')
             # window_name = "Color Sobel Edge Detector"
             ddepth = cv2.CV_16S
-            src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
-            src_x = cv2.Sobel(src, ddepth, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
-            src_y = cv2.Sobel(src, ddepth, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+            # src = self.Smooth2D(SrcImg, 3, SmType= SmoothType.GAUSSIAN)
+            src_x = cv2.Sobel(SrcImg, ddepth, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+            src_y = cv2.Sobel(SrcImg, ddepth, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
             abs_src_x = cv2.convertScaleAbs(src_x)
             abs_src_y = cv2.convertScaleAbs(src_y)
             grad = cv2.addWeighted(abs_src_x, 0.5, abs_src_y, 0.5, 0)
@@ -406,30 +406,36 @@ class ConvIP(BaseIP):
         if SpType == SharpType(1):
             print('LAPLACE_TYPE1')
             Img = SrcImg
+            img_init = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
             kernel = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
-            result = cv2.filter2D(Img, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
-            output = cv2.addWeighted(Img, 1, result, Gain, 0)
-            return output
+            output = img_init + (Gain * kernel)
+            result = cv2.filter2D(Img, ddepth=-1, kernel=output, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            # output = cv2.addWeighted(Img, 1, result, Gain, 0)
+            return result
 
         if SpType == SharpType(2):
             print('LAPLACE_TYPE2')
             Img = SrcImg
+            img_init = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
             kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
-            result = cv2.filter2D(Img, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
-            output = cv2.addWeighted(Img, 1, result, Gain, 0)
-            return output
+            output = img_init + (Gain * kernel)
+            result = cv2.filter2D(Img, ddepth=-1, kernel=output, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            # output = cv2.addWeighted(Img, 1, result, Gain, 0)
+            return result
 
         if SpType == SharpType(3):
             print('SECOND_ORDER_LOG')
             Img = SrcImg
+            img_init = np.array([[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]])
             kernel = np.array([[0, 0, -1, 0, 0], [0, -1, -2, -1, 0], [-1, -2, 16, -2, -1], [0, -1, -2, -1, 0], [0, 0, -1, 0, 0]])
-            result = cv2.filter2D(Img, ddepth=-1, kernel=kernel, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
-            output = cv2.addWeighted(Img, 1, result, Gain, 0)
-            return output
+            output = img_init + (Gain * kernel)
+            result = cv2.filter2D(Img, ddepth=-1, kernel=output, anchor = (-1, -1), delta = 0, borderType=cv2.BORDER_DEFAULT)
+            # output = cv2.addWeighted(Img, 1, result, Gain, 0)
+            return result
 
         if SpType == SharpType(4):
             print('UNSHARP_MASK')
             Img = SrcImg
             smooth = self.Smooth2D(Img, 9, SmType)
             output = cv2.addWeighted(SrcImg, 1+Gain, smooth, Gain*-1, 0)
-            return output   
+            return output
